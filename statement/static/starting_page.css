@@ -1,0 +1,29 @@
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .credit-view, .debit-view {
+    text-align: center;
+    display: block;
+    border: 2px solid #ea4343;
+    border-radius: 5px;
+    box-shadow: 2px 2px 2px #ccc;
+    object-fit: cover;
+
+  }
+  
+#heading1 {
+  background-color: #f7df1e; /* yellow */
+  color: #2d2d2d; /* dark gray */
+  padding: 10px; /* adds padding around the text */
+  font-size: 36px; /* increases the font size */
+  font-weight: bold; /* makes the text bold */
+  text-align: center; /* centers the text */
+  text-transform: uppercase; /* makes the text uppercase */
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2); /* adds a subtle shadow */
+  margin: 0;
+  margin-bottom: 20px; /* adds space between this heading and the next element */
+}

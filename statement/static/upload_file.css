@@ -1,0 +1,37 @@
+
+#form-container {
+    text-align:justify;
+  }
+  
+  /* Style the form fields */
+  #option {
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+  
+  #file {
+    padding: 10px;
+    margin: 10px;
+  }
+  
+  button[type="submit"] {
+    padding: 10px;
+    margin: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+  }
+  
+  /* Style the form labels */
+  label {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    margin-right: 10px;
+    font-size: 16px;
+  }

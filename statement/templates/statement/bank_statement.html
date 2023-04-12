@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Tracker{% endblock %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'include\header.css' %}">
+    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'bank_statement.css' %}">
+{% endblock css_files %}
+
+{% block content %}
+    {% include "header.html" %}
+    {% include "navigation.html" %}
+    <form method="GET">
+        <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" value="{{ min_date }}" min="{{ min_date }}" max="{{ max_date }}">
+        <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" value="{{ max_date }}" min="{{ min_date }}" max="{{ max_date }}">
+
+        <label for="category">ExpenseType:</label>
+            <select name="category">
+                <option value="{{ expense_type_option }}">{{ expense_type_option }}</option>
+                {% for category in expense_type %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        <button type="submit">Filter</button>
+    </form>
+    <section>    
+        {{ statement_table|safe }}
+    </section>
+{% endblock content %}

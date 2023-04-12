@@ -1,0 +1,102 @@
+table {
+    font-size: 12px;
+    border-collapse: collapse;
+    width: 100%;
+
+  }
+  
+  table th,
+  table td {
+    padding: 0.5em;
+    text-align: left;
+    border: 1px solid #ba5555be;  
+    font-size: 15px;
+    min-width: 100px;
+
+  }
+  
+  table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  table td:first-child,
+  table th:first-child {
+    display: none;
+  }
+
+  table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  table tr:hover {
+    background-color: #f3c547;
+  }
+  
+  table caption {
+    font-weight: bold;
+  }
+  
+form {
+    padding: 5px 20px;
+    background-color: #56efce;
+    border: 1px solid #aa4c4c;
+    border-radius: 5px;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  input[type="date"], select {
+    display: inline-block;
+    padding: 5px;
+    width: max-content;
+    border-radius: 3px;
+    border: none;
+    box-shadow: none;
+    color: #555;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  input[type="date"]:focus, select:focus {
+    outline: none;
+    border: 2px solid #007bff;
+  }
+  
+  button[type="submit"] {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 3px;
+    border: none;
+    box-shadow: none;
+    background-color: #0a6018;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #1b8a51;
+  }  
+  button[type="submit"]:active {
+    background-color: #1eeb39;
+  }
+
+  form:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.2;
+    transform: scale(1.2);
+    margin-top: 20px;
+  }
+  

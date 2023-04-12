@@ -1,0 +1,29 @@
+# Django-related files and directories
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+
+#python env
+/venv
+
+# Media files (uploads, user-generated content)
+/media/
+/static/media/
+/uploads
+
+# Static files (CSS, JavaScript, images)
+/staticfiles/
+/static/admin/
+
+# Environment-specific files
+.env
+*.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db

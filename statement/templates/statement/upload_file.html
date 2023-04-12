@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Upload Statement
+{% endblock title %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="{% static 'include\header.css' %}">
+  <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
+  <link rel="stylesheet" href="{% static 'upload_file.css' %}">
+
+{% endblock css_files %}
+
+{% block content %}
+  {% include "header.html" %}
+  {% include "navigation.html" %}
+
+  <h2 class="text-2xl font-bold mb-4">Bank Details</h2>
+
+  <div id="form-container">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div>
+        <label for="bank">Select Bank:</label>
+        <select name="bank">
+          <option value="{{ bank_option }}">{{ bank_option }}</option>
+          {% for bank in banks %}
+              <option value="{{ bank }}">{{ bank }}</option>
+          {% endfor %}
+      </select>
+      </div>
+      <div>
+        <label for="statement">Bank Statement:</label>
+        <input type="file" id="statement" name="statement">
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+{% endblock %}
