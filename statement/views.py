@@ -8,8 +8,12 @@ from django.shortcuts import render
 from django.conf import settings
 import plotly.graph_objs as go
 import plotly.offline as opy
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.shortcuts import redirect
+from django import forms
 
-from .forms import UploadFileForm
+from .forms import SignupForm
 
 # Create your views here.
 
@@ -19,9 +23,39 @@ BANKS = [
 ]
 
 
-def handle_uploaded_file(f):
+class BooleanForm(forms.Form):
+    """To have a Boolean switch in the form"""
+
+    my_boolean_field = forms.BooleanField(label="detailed_view", required=False)
+
+
+def ensure_dirs(directory):
+    "To create the directory recursively if not found"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def verify_uploads(request):
+    """To verify if user have already uploaded some files"""
+    username = request.user.username
+    print(username)
+    folder_path = os.path.join(settings.BASE_DIR, "uploads", username)
+    ensure_dirs(folder_path)
+    files = [
+        os.path.join(folder_path, f)
+        for f in os.listdir(folder_path)
+        if os.path.isfile(os.path.join(folder_path, f))
+    ]
+
+    return files
+
+
+def handle_uploaded_file(request, f):
     """To save the uploaded file"""
-    with open(os.path.join(settings.BASE_DIR, "uploads", f.name), "wb") as destination:
+    username = request.user.username
+    folder_path = os.path.join(settings.BASE_DIR, "uploads", username)
+    ensure_dirs(folder_path)
+    with open(os.path.join(folder_path, f.name), "wb") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
 
@@ -32,7 +66,7 @@ def upload_file(request):
         # Handle form submission here
         bank = request.POST.get("bank")
         statement_file = request.FILES.get("statement")
-        handle_uploaded_file(statement_file)
+        handle_uploaded_file(request, statement_file)
         print(f"---- {bank} ---------------------------")
 
         # Do something with the bank and statement_file data, such as saving to a database or processing the file
@@ -55,12 +89,10 @@ def generate_app_password(request):
     )
 
 
-def format_statement():
+def format_statement(files):
     """Use the statement to return pandas DF"""
 
-    bank_statement_path = os.path.join(
-        settings.BASE_DIR, "uploads", "50100356198949_1680754548417.txt"
-    )
+    bank_statement_path = files[0]
 
     statement_df = pd.read_csv(bank_statement_path, header=0)
     statement_df = statement_df.applymap(
@@ -113,32 +145,55 @@ def add_category(df):
 
 def bank_statement(request):
     """Help page: /"""
-    statement_table = format_statement()
+
+    files = verify_uploads(request)
+    print(files)
+    if len(files) == 0:
+        return redirect("upload-file")
+
+    statement_table = format_statement(files)
     statement_table.loc[:] = add_category(statement_table)
     dates = statement_table["Date"]
-    # expense_type = list(statement_table.columns)
-    # expense_type.append("Credit")
-    # expense_type.append("Debit")
 
-    expense_type = set(statement_table["Category Inner"])
+    credit_or_debit_option = "All"
+    credit_or_debit = [
+        "All",
+        "Credit",
+        "Debit",
+    ]
 
+    expense_type = sorted(list(set(statement_table["Category Inner"])))
+    expense_type.insert(0, "All")
     start_date_option = request.GET.get("start_date")
     end_date_option = request.GET.get("end_date")
     expense_type_option = request.GET.get("category")
+    credit_or_debit_option = request.GET.get("credit_or_debit")
+
+    if expense_type_option is None:
+        expense_type_option = "All"
+    if credit_or_debit_option is None:
+        credit_or_debit_option = "All"
 
     mask = pd.Series(
         True, index=statement_table.index
     )  # initialize with all rows selected
-    if expense_type_option:
+    if expense_type_option != "All":
         mask = mask & (statement_table["Category Inner"] == expense_type_option)
     if start_date_option:
         mask = mask & (statement_table["Date"] >= start_date_option)
     if end_date_option:
         mask = mask & (statement_table["Date"] <= end_date_option)
+    if credit_or_debit_option == "Debit":
+        statement_table = statement_table.drop(["Credit Amount"], axis=1)
+        mask = mask & (statement_table["Debit Amount"] > 0.0)
+    if credit_or_debit_option == "Credit":
+        statement_table = statement_table.drop(["Debit Amount"], axis=1)
+        mask = mask & (statement_table["Credit Amount"] > 0.0)
 
-    statement_table_html = (
-        statement_table[mask].drop(["Category Inner"], axis=1).to_html()
-    )
+    statement_table = statement_table[mask]
+    statement_table = statement_table.drop(["Category Inner"], axis=1)
+
+    statement_table_html = statement_table.to_html()
 
     return render(
         request=request,
@@ -148,6 +203,8 @@ def bank_statement(request):
             "min_date": str(dates[0]).split()[0],
             "max_date": str(dates[len(dates) - 1]).split()[0],
             "expense_type_option": expense_type_option,
+            "credit_or_debit_option": credit_or_debit_option,
+            "credit_or_debit": credit_or_debit,
             "expense_type": expense_type,
         },
     )
@@ -172,7 +229,7 @@ def generate_bargraph(credit_by_month, debit_by_month):
             y=list(debit_by_month.values()),
             # name="Debit",
             marker=dict(color="#EB6632"),
-            name="Credit",
+            name="Debit",
         )
     )
 
@@ -207,7 +264,7 @@ def statement_as_bar(statement_df):
     months = []
     monthly_debit = debit_df.resample("M")
     for name, data in monthly_debit:
-        months.append(f"{name.month} {name.year}")
+        months.append(f"{name.strftime('%b')} {name.year}")
         aggregare_debit[name] = data["Debit Amount"].sum()
 
     monthly_credit = credit_df.resample("M")
@@ -222,9 +279,13 @@ def statement_as_bar(statement_df):
     return {"plot_html": plot_html}, months
 
 
-def debit_pie(last_month_debit):
+def debit_pie(last_month_debit, detailed_view):
     """To returnt he debit pie chart for a month"""
-    last_month_debit_group = last_month_debit.groupby("Category Inner")
+    if detailed_view:
+        last_month_debit_group = last_month_debit.groupby("Category Inner")
+    else:
+        last_month_debit_group = last_month_debit.groupby("Mode")
+
     debit_category_dict = {}
     for name, category in last_month_debit_group:
         debit_category_dict[name] = category["Debit Amount"].sum()
@@ -246,9 +307,13 @@ def debit_pie(last_month_debit):
     return plot_html
 
 
-def credit_pie(last_month_credit):
+def credit_pie(last_month_credit, detailed_view):
     """To returnt he credit pie chart for a month"""
-    last_month_credit_group = last_month_credit.groupby("Category Inner")
+    if detailed_view:
+        last_month_credit_group = last_month_credit.groupby("Category Inner")
+    else:
+        last_month_credit_group = last_month_credit.groupby("Mode")
+
     credit_category_dict = {}
     for name, category in last_month_credit_group:
         credit_category_dict[name] = category["Credit Amount"].sum()
@@ -270,7 +335,7 @@ def credit_pie(last_month_credit):
     return plot_html
 
 
-def statement_as_pichart(statement_df, month):
+def statement_as_pichart(statement_df, month, detailed_view):
     """Handler for Months statement PieChart"""
     category = [
         re.split(r" |-|/", narration)[0] for narration in statement_df["Narration"]
@@ -298,7 +363,7 @@ def statement_as_pichart(statement_df, month):
     last_month_debit = None
     monthly_debit = debit_df.resample("M")
     for name, data in monthly_debit:
-        if month == f"{name.month} {name.year}":
+        if month == f"{name.strftime('%b')} {name.year}":
             last_month_debit = data.copy()
             break
     last_month_debit.loc[:] = add_category(last_month_debit)
@@ -306,28 +371,43 @@ def statement_as_pichart(statement_df, month):
     last_month_credit = None
     monthly_credit = credit_df.resample("M")
     for name, data in monthly_credit:
-        if month == f"{name.month} {name.year}":
+        if month == f"{name.strftime('%b')} {name.year}":
             last_month_credit = data.copy()
             break
     last_month_credit.loc[:] = add_category(last_month_credit)
 
     context = {}
-    context["credit_pie"] = credit_pie(last_month_credit)
-    context["debit_pie"] = debit_pie(last_month_debit)
+    context["credit_pie"] = credit_pie(last_month_credit, detailed_view)
+    context["debit_pie"] = debit_pie(last_month_debit, detailed_view)
 
     return context
 
 
 def starting_page(request):
     """Starting page: /"""
-    statement_df = format_statement()
+    files = verify_uploads(request)
+
+    if len(files) == 0:
+        return redirect("upload-file")
+
+    statement_df = format_statement(files)
     context, months = statement_as_bar(statement_df)
     month_option = request.GET.get("month")
+
+    detailed_view = BooleanForm()
+    context["detailed_view"] = False
+
+    if request.method == "GET":
+        detailed_view = bool(request.GET.get("detailed_view"))
+        context["detailed_view"] = detailed_view
+        print(f"------- detailed view: {detailed_view}")
+
     if month_option is None:
         month_option = months[-1]
     context["months"] = months
     context["month_option"] = month_option
-    pie_context = statement_as_pichart(statement_df, month_option)
+    context["detailed_view"] = detailed_view
+    pie_context = statement_as_pichart(statement_df, month_option, detailed_view)
     context.update(pie_context)
 
     return render(
@@ -335,3 +415,38 @@ def starting_page(request):
         template_name="statement/starting_page.html",
         context=context,
     )
+
+
+def login_view(request):
+    """View for handling user login"""
+    if request.method == "POST":
+        form = AuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = authenticate(request=request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("starting-page")
+    else:
+        form = AuthenticationForm()
+    return render(request, "statement/login.html", {"form": form})
+
+
+def signup_view(request):
+    """View for handling user signup"""
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            # Save the user's information and redirect to the login page
+            return redirect("login")
+    else:
+        form = SignupForm()
+
+    return render(request, "statement/signup.html", {"form": form})
+
+
+def logout_view(request):
+    """View for handling user logout"""
+    logout(request)
+    return redirect("starting-page")

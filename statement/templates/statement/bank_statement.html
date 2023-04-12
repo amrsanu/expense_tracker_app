@@ -17,7 +17,13 @@
             <input type="date" name="start_date" value="{{ min_date }}" min="{{ min_date }}" max="{{ max_date }}">
         <label for="end_date">End Date:</label>
             <input type="date" name="end_date" value="{{ max_date }}" min="{{ min_date }}" max="{{ max_date }}">
-
+        <label for="category_credit_debit">Credit/Debit:</label>
+        <select name="credit_or_debit">
+            <option value="{{ credit_or_debit_option }}">{{ credit_or_debit_option }}</option>
+            {% for category in credit_or_debit %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
         <label for="category">ExpenseType:</label>
             <select name="category">
                 <option value="{{ expense_type_option }}">{{ expense_type_option }}</option>

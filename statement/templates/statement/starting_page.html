@@ -21,6 +21,7 @@
     <section>
         <h1 id="heading1">Monthly PiChart</h1>
         <form method="GET" >
+            {% csrf_token %}
             <label for="month">Select Month:</label>
                 <select name="month">
                     <option value="{{ month_option }}">{{ month_option }}</option>
@@ -28,6 +29,11 @@
                         <option value="{{ month }}">{{ month }}</option>
                     {% endfor %}
                 </select>
+            <label for="detailed_view">Detailed View:</label>
+            <label class="switch">
+                <input type="checkbox" name="detailed_view" id="detailed_view" {% if detailed_view %}checked{% endif %}>
+                <span class="slider round"></span>
+            </label>    
             <button type="submit">Filter</button>
         </form>
         <div class="container">

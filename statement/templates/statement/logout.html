@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Tracker{% endblock %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'include\header.css' %}">
+    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'starting_page.css' %}">
+    <link rel="stylesheet" href="{% static 'bank_statement.css' %}">
+{% endblock css_files %}
+
+{% block content %}
+    {% include "header.html" %}
+    {% include "navigation.html" %}
+  <h1>Logged out</h1>
+  <p>You have been logged out. Thank you for using our website.</p>
+{% endblock %}
