@@ -9,8 +9,11 @@
   <link rel="stylesheet" href="{% static 'include\header.css' %}">
   <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
   <link rel="stylesheet" href="{% static 'upload_file.css' %}">
-
 {% endblock css_files %}
+
+{% block scripts %}
+  <script src="{% static 'routines/upload_file.js' %}"></script>
+{% endblock scripts %}
 
 {% block content %}
   {% include "header.html" %}
@@ -49,22 +52,30 @@
     
   </div>
 
-  <h2>Uploaded Bank Statements</h2>
-  <form method="post">
-    {% csrf_token %}
-    <table>
-      {% for statement_file in statement_files %}
-        <tr>
-          <td><input type="checkbox" name="file" value="{{ statement_file }}" /></td>
-          <td><label>{{ statement_file }}</label></td>
-        </tr>
-      {% endfor %}
-      <tr>
-        <td></td>
-        <td><button type="submit" name="action" value="delete-selected">Delete selected</button></td>
-      </tr>
-    </table>
-  </form>
+  {% if statement_files %}
+    <h2>Uploaded Bank Statements</h2>
+    <div id="form-container">
+      <form method="post">
+        {% csrf_token %}
+        <table>
+          <tr>
+            <td><input type="checkbox" id="select-all" onclick="toggle(this);" /></td>
+            <td><label for="select-all"><strong>Saved Bank Statements</strong></label></td>
+          </tr>
+          {% for statement_file in statement_files %}
+            <tr>
+              <td><input type="checkbox" name="file" value="{{ statement_file }}" /></td>
+              <td><label>{{ statement_file }}</label></td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td></td>
+            <td><button type="submit" name="action" value="delete-selected">Delete selected</button></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  {% endif %}
   
   
   
