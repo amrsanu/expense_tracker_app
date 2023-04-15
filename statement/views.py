@@ -2,18 +2,16 @@
 
 import os
 import re
+import io
 
 import pandas as pd
 from django.shortcuts import render
-from django.conf import settings
-import plotly.graph_objs as go
-import plotly.offline as opy
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect
+from django.core.cache import cache
 from django import forms
 
-from .forms import SignupForm
+import plotly.graph_objs as go
+import plotly.offline as opy
 
 # Create your views here.
 
@@ -21,6 +19,8 @@ BANKS = [
     "HDFC",
     "ICICI",
 ]
+
+STATEMENT_FILES = "bank_statements"
 
 
 class BooleanForm(forms.Form):
@@ -37,48 +37,67 @@ def ensure_dirs(directory):
 
 def verify_uploads(request):
     """To verify if user have already uploaded some files"""
-    username = request.user.username
-    print(username)
-    folder_path = os.path.join(settings.BASE_DIR, "uploads", username)
-    ensure_dirs(folder_path)
-    files = [
-        os.path.join(folder_path, f)
-        for f in os.listdir(folder_path)
-        if os.path.isfile(os.path.join(folder_path, f))
-    ]
+    files = None
+    statement_files_string = cache.get(STATEMENT_FILES)
+
+    if statement_files_string is not None and len(statement_files_string.strip()) != 0:
+        statement_file = statement_files_string.split(" ")
+        files = [f for f in statement_file]
 
     return files
 
 
-def handle_uploaded_file(request, f):
-    """To save the uploaded file"""
-    username = request.user.username
-    folder_path = os.path.join(settings.BASE_DIR, "uploads", username)
-    ensure_dirs(folder_path)
-    with open(os.path.join(folder_path, f.name), "wb") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-
 def upload_file(request):
     """Upload file helper"""
-    if request.method == "POST":
+    context = {
+        "bank_option": "Select Bank",
+        "banks": BANKS,
+    }
+
+    if request.method == "POST" and "bank" in request.POST:
         # Handle form submission here
         bank = request.POST.get("bank")
         statement_file = request.FILES.get("statement")
-        handle_uploaded_file(request, statement_file)
-        print(f"---- {bank} ---------------------------")
+        statement_file_name = statement_file.name
+        if (not statement_file_name.endswith(".txt")) and (
+            not statement_file_name.endswith(".csv")
+        ):
+            print("----- WRONG FORMAT ------------------")
+            context["upload_error"] = True
+        else:
+            statement_files_string = cache.get(STATEMENT_FILES)
 
-        # Do something with the bank and statement_file data, such as saving to a database or processing the file
-        return render(
-            request, "statement/upload_success.html"
-        )  # Render a success page after processing the form
-    else:
-        context = {
-            "bank_option": "Select Bank",
-            "banks": BANKS,
-        }
-        return render(request, "statement/upload_file.html", context)
+            if statement_files_string is not None:
+                statement_files_string = (
+                    f"{statement_files_string} {statement_file_name}"
+                )
+            else:
+                statement_files_string = statement_file_name
+
+            cache.set(STATEMENT_FILES, statement_files_string)
+            cache.set(statement_file_name, statement_file.read())
+
+    if request.method == "POST" and "file" in request.POST:
+        # Handle file deletion here
+        statement_files = cache.get(STATEMENT_FILES).split()
+
+        statement_files_to_delete = request.POST.getlist("file")
+        for statement_file_name in statement_files_to_delete:
+            cache.delete(statement_file_name)
+            statement_files.remove(statement_file_name)
+        print(f"*** {statement_files}")
+
+        cache.set(STATEMENT_FILES, " ".join(statement_files))
+
+    statement_files_string = cache.get(STATEMENT_FILES)
+    context["statement_files"] = statement_files_string.split()
+
+    return render(request, "statement/upload_file.html", context)
+
+
+def no_statement(request):
+    """To return a page if no statement is found"""
+    return render(request, "statement/no_statement.html")
 
 
 def generate_app_password(request):
@@ -91,10 +110,13 @@ def generate_app_password(request):
 
 def format_statement(files):
     """Use the statement to return pandas DF"""
+    statement_file_string = cache.get(STATEMENT_FILES)
+    bank_statement_path = statement_file_string.split()[0]
 
-    bank_statement_path = files[0]
+    statement_file_data = cache.get(bank_statement_path)
 
-    statement_df = pd.read_csv(bank_statement_path, header=0)
+    statement_df = pd.read_csv(io.StringIO(statement_file_data.decode("utf-8")))
+
     statement_df = statement_df.applymap(
         lambda x: x.strip() if isinstance(x, str) else x
     )
@@ -147,9 +169,8 @@ def bank_statement(request):
     """Help page: /"""
 
     files = verify_uploads(request)
-    print(files)
-    if len(files) == 0:
-        return redirect("upload-file")
+    if files is None:
+        return redirect("no-statement")
 
     statement_table = format_statement(files)
     statement_table.loc[:] = add_category(statement_table)
@@ -387,8 +408,9 @@ def starting_page(request):
     """Starting page: /"""
     files = verify_uploads(request)
 
-    if len(files) == 0:
-        return redirect("upload-file")
+    if files is None:
+        return redirect("no-statement")
+    print(f"======== {files}")
 
     statement_df = format_statement(files)
     context, months = statement_as_bar(statement_df)
@@ -400,7 +422,6 @@ def starting_page(request):
     if request.method == "GET":
         detailed_view = bool(request.GET.get("detailed_view"))
         context["detailed_view"] = detailed_view
-        print(f"------- detailed view: {detailed_view}")
 
     if month_option is None:
         month_option = months[-1]
@@ -415,38 +436,3 @@ def starting_page(request):
         template_name="statement/starting_page.html",
         context=context,
     )
-
-
-def login_view(request):
-    """View for handling user login"""
-    if request.method == "POST":
-        form = AuthenticationForm(request=request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            user = authenticate(request=request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("starting-page")
-    else:
-        form = AuthenticationForm()
-    return render(request, "statement/login.html", {"form": form})
-
-
-def signup_view(request):
-    """View for handling user signup"""
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            # Save the user's information and redirect to the login page
-            return redirect("login")
-    else:
-        form = SignupForm()
-
-    return render(request, "statement/signup.html", {"form": form})
-
-
-def logout_view(request):
-    """View for handling user logout"""
-    logout(request)
-    return redirect("starting-page")

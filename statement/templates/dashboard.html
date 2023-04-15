@@ -13,6 +13,18 @@
 {% block content %}
     {% include "header.html" %}
     {% include "navigation.html" %}
-  <h1>Logged out</h1>
-  <p>You have been logged out. Thank you for using our website.</p>
-{% endblock %}
+
+    <section>
+        <h1>Welcome {{ user }} </h1>
+        
+        <h2>
+            Upload statement to get the statement summary- 
+            <a href="{% url 'upload-file' %}">UpdateStatement</a>
+        </h2>
+
+
+
+        {{ plot_html|safe }}
+    </section>
+    
+{% endblock content %}

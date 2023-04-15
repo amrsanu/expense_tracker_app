@@ -15,7 +15,14 @@
     padding: 10px;
     margin: 10px;
   }
-  
+  p {
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+    border: 1px solid black;
+    border-radius: 4px;
+  }
+
   button[type="submit"] {
     padding: 10px;
     margin: 10px;
@@ -30,8 +37,37 @@
   /* Style the form labels */
   label {
     display: inline-block;
-    width: 150px;
-    text-align: right;
+    width: max-content;
     margin-right: 10px;
-    font-size: 16px;
+    font-size: 20px;
+  }
+
+  #file-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #file-list li {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  #file-list input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  
+  button[type="submit"] {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3e8e41;
   }
