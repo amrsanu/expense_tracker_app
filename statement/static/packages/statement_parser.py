@@ -71,7 +71,7 @@ def icici_credit(statement_file):
         statement_df = statement_df.rename(
             columns={col: col.strip().title() for col in statement_df.columns}
         )
-        statement_df["Date"] = pd.to_datetime(statement_df["Date"], format="%d/%m/%y")
+        statement_df["Date"] = pd.to_datetime(statement_df["Date"], format="%d-%m-%Y")
         statement_df["Date"] = statement_df["Date"].dt.strftime("%d-%m-%Y")
 
         statement_df["Narration"] = (

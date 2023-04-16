@@ -4,32 +4,40 @@
 {% block title %}Expense Tracker{% endblock %}
 
 {% block css_files %}
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'footer.css' %}">
     <link rel="stylesheet" href="{% static 'include\header.css' %}">
     <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
-    <link rel="stylesheet" href="{% static 'generate_app_password.css' %}">
-
+    <link rel="stylesheet" href="{% static 'help_page.css' %}">
 {% endblock css_files %}
 
 {% block content %}
     {% include "header.html" %}
     {% include "navigation.html" %}
+    <h1>How to navigate the Expense Tracker</h1>
 
-    <section id="help">
-        <h1>How to navigate the Expense Tracker</h1>
-        <h3>Disclamer: </h3>
-        <ol>
-            <li>All your uploaded data will be save securely on your system local cache.</li>
-            <li>The page will not save any of the data.</li>
-        </ol>
+    <div class="center">
+        <section id="help">
+          <div>
+            <h3>Disclaimer: </h3>
+            <ol>
+              <li>All your uploaded data will be saved securely on your system's local cache.</li>
+              <li>The page will not save any of the data.</li>
+            </ol>
+          </div>
+      
+          <div>
+            <h3>Tips: </h3>
+            <ol>
+              <li>Use the UpdateStatement page to upload the statement.</li>
+              <li>Only the latest statement will be used.</li>
+              <li>Try to upload cumulative statements for a better experience.</li>
+              <li>Delete or visit later to check back. Data will be saved securely on your system's cache.</li>
+            </ol>
+          </div>
+        </section>
+      </div>
+      
 
-        <h3>Tips: </h3>
-        <ol>
-            <li>Use the UpdateStatement page to upload the statement.</li>
-            <li>Only the latest statement will be used.</li>
-            <li>Try to upload cummulative statement for better experince.</li>
-            <li>Delete or visit later to check back. Data will be saved securely on your systems cache.</li>
-
-        </ol>
-    </section>
 
 {% endblock content %}
