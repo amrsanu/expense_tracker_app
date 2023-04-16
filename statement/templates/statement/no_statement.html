@@ -4,18 +4,12 @@
 {% block title %}Expense Tracker{% endblock %}
 
 {% block css_files %}
-    <link rel="stylesheet" href="{% static 'base.css' %}">
-    <link rel="stylesheet" href="{% static 'include\header.css' %}">
-    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
-    <link rel="stylesheet" href="{% static 'starting_page.css' %}">
     <link rel="stylesheet" href="{% static 'no_statement.css' %}">
     <link rel="stylesheet" href="{% static 'upload_file.css' %}">
     <!-- Bootstrap 5 CSS -->
 {% endblock css_files %}
 
 {% block content %}
-    {% include "header.html" %}
-    {% include "navigation.html" %}
     <!-- Slideshow container -->
     <script src="{% static 'routines/gallery.js' %}"></script>
 

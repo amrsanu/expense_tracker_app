@@ -4,17 +4,11 @@
 {% block title %}Expense Tracker{% endblock %}
 
 {% block css_files %}
-    <link rel="stylesheet" href="{% static 'include\header.css' %}">
-    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
     <link rel="stylesheet" href="{% static 'starting_page.css' %}">
-    <link rel="stylesheet" href="{% static 'bank_statement.css' %}">
     <link rel="stylesheet" href="{% static 'no_statement.css' %}">
-
 {% endblock css_files %}
 
 {% block content %}
-    {% include "header.html" %}
-    {% include "navigation.html" %}
 
     <section>
         <h1 id="heading1">Monthly Credit & Debit View</h1>

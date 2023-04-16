@@ -4,16 +4,11 @@
 {% block title %}Expense Tracker{% endblock %}
 
 {% block css_files %}
-    <link rel="stylesheet" href="{% static 'include\footer.css' %}">
-    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
     <link rel="stylesheet" href="{% static 'bank_statement.css' %}">
-    <link rel="stylesheet" href="{% static 'base.css' %}">
-    <link rel="stylesheet" href="{% static 'footer.css' %}">
 {% endblock css_files %}
 
 {% block content %}
-    {% include "header.html" %}
-    {% include "navigation.html" %}
+
     <form method="GET">
         <label for="start_date">Start Date:</label>
             <input type="date" name="start_date" value="{{ min_date }}" min="{{ min_date }}" max="{{ max_date }}">

@@ -6,11 +6,7 @@
 {% endblock title %}
 
 {% block css_files %}
-  <link rel="stylesheet" href="{% static 'include\header.css' %}">
-  <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
   <link rel="stylesheet" href="{% static 'upload_file.css' %}">
-  <link rel="stylesheet" href="{% static 'base.css' %}">
-  <link rel="stylesheet" href="{% static 'footer.css' %}">
 {% endblock css_files %}
 
 {% block scripts %}
@@ -18,8 +14,6 @@
 {% endblock scripts %}
 
 {% block content %}
-  {% include "header.html" %}
-  {% include "navigation.html" %}
 
   <h2>Bank Details</h2>
 

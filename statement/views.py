@@ -65,11 +65,9 @@ def upload_file(request):
         statement_file_name = statement_file.name
 
         if not statement_file_name.endswith((".txt", ".csv", ".CSV")):
-            print("----- WRONG FORMAT ------------------")
             context["upload_error"] = True
         else:
             statement_file_df = statement_parser.parse_statement(bank, statement_file)
-            print("---------- Error after parsing")
             if statement_file_df is None:
                 context["upload_error"] = True
             else:
@@ -98,7 +96,6 @@ def upload_file(request):
         for statement_file_name in statement_files_to_delete:
             cache.delete(statement_file_name)
             statement_files.remove(statement_file_name)
-        print(f"*** {statement_files}")
 
         cache.set(STATEMENT_FILES, " ".join(statement_files))
 
@@ -141,7 +138,6 @@ def format_statement():
         io.StringIO(statement_csv),
         index_col=0,
     )
-    print(statement_df.head())
     statement_df["Date"] = pd.to_datetime(statement_df["Date"], format="%d-%m-%Y")
 
     return statement_df
@@ -436,11 +432,9 @@ def starting_page(request):
         statement_file_name = statement_file.name
 
         if not statement_file_name.endswith((".txt", ".csv", ".CSV")):
-            print("----- WRONG FORMAT ------------------")
             context["upload_error"] = True
         else:
             statement_file_df = statement_parser.parse_statement(bank, statement_file)
-            print("---------- Error after parsing")
             if statement_file_df is None:
                 context["upload_error"] = True
             else:
@@ -488,7 +482,6 @@ def starting_page(request):
             context=context,
         )
 
-    print(f"======== {files}")
     statement_df = format_statement()
     context, months = statement_as_bar(statement_df)
     month_option = request.GET.get("month")

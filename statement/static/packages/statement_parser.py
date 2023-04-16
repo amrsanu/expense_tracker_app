@@ -16,7 +16,6 @@ def hdfc_bank(statement_file):
         " Date     ,Narration                                                                                                                ,Value Dat,Debit Amount       ,Credit Amount      ,Chq/Ref Number   ,Closing Balance"
         in statement_file_data
     ):
-        print("-------- ALL Good --------------------")
         statement_df = pd.read_csv(io.StringIO(statement_file_data))
         statement_df = statement_df.applymap(
             lambda x: x.strip() if isinstance(x, str) else x
@@ -32,7 +31,6 @@ def hdfc_bank(statement_file):
         statement_df = statement_df.reset_index(drop=True)
 
     else:
-        print("-------- ERROR --------------------")
         return None
     # statement_lines = raw_statement.split("\r\n")
     return statement_df
@@ -41,12 +39,9 @@ def hdfc_bank(statement_file):
 def icici_credit(statement_file):
     """To format the HDFC bank statement"""
     statement_file_data = statement_file.read().decode()
-    print(statement_file_data)
-    print(f"ICICI---------- {statement_file_data}")
 
     if "DATE,MODE,PARTICULARS,DEPOSITS,WITHDRAWALS,BALANCE" in statement_file_data:
         # if "Statement of Transactions in SavingsNumber" in statement_file_data:
-        print("-------- ALL Good --------------------")
         start, end = 0, 0
         stmt_lines = statement_file_data.split("/r/n")
         for i, line in enumerate(stmt_lines):
@@ -64,7 +59,6 @@ def icici_credit(statement_file):
         statement_file_data = " /r/n".join(stmt_lines)
         statement_df = pd.read_csv(io.StringIO(statement_file_data))
         statement_df.dropna(subset=["DATE"], inplace=True)
-        print(statement_df.head())
         statement_df = statement_df.applymap(
             lambda x: x.strip() if isinstance(x, str) else x
         )
@@ -98,10 +92,8 @@ def icici_credit(statement_file):
                 "Closing Balance",
             ]
         )
-        print(statement_df.head())
 
     else:
-        print("-------- ERROR --------------------")
         return None
     # statement_lines = raw_statement.split("\r\n")
     return statement_df

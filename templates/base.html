@@ -11,13 +11,19 @@
     </title>
     <link rel="stylesheet" href="{% static "base.css" %}">
     <link rel="stylesheet" href="{% static 'footer.css' %}">
+    <link rel="stylesheet" href="{% static 'include\header.css' %}">
+    <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
 
     {% block css_files %}{% endblock css_files %}
     {% block scripts  %}{% endblock scripts  %}
 </head>
 
 <body>    
+    {% include "header.html" %}
+    {% include "navigation.html" %}
+
     {% block content %}{% endblock content %}
+    
     {% include "footer.html" %}
 </body>
 
