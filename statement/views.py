@@ -13,6 +13,8 @@ from django import forms
 import plotly.graph_objs as go
 import plotly.offline as opy
 
+from statement.static.packages import statement_parser
+
 # Create your views here.
 
 BANKS = [
@@ -59,23 +61,32 @@ def upload_file(request):
         bank = request.POST.get("bank")
         statement_file = request.FILES.get("statement")
         statement_file_name = statement_file.name
-        if (not statement_file_name.endswith(".txt")) and (
-            not statement_file_name.endswith(".csv")
-        ):
+
+        if not statement_file_name.endswith((".txt", ".csv", ".CSV")):
             print("----- WRONG FORMAT ------------------")
             context["upload_error"] = True
         else:
-            statement_files_string = cache.get(STATEMENT_FILES)
-
-            if statement_files_string is not None:
-                statement_files_string = (
-                    f"{statement_files_string} {statement_file_name}"
-                )
+            statement_file_df = statement_parser.parse_statement(bank, statement_file)
+            print("---------- Error after parsing")
+            if statement_file_df is None:
+                context["upload_error"] = True
             else:
-                statement_files_string = statement_file_name
+                # Convert statement_file_df to html and save to cache
+                statement_files_string = cache.get(STATEMENT_FILES)
 
-            cache.set(STATEMENT_FILES, statement_files_string)
-            cache.set(statement_file_name, statement_file.read())
+                if statement_files_string is not None:
+                    statement_files_string = (
+                        f"{statement_files_string} {statement_file_name}"
+                    )
+                else:
+                    statement_files_string = statement_file_name
+
+                cache.set(STATEMENT_FILES, statement_files_string)
+
+                cache.set(
+                    statement_file_name,
+                    statement_file_df.to_csv(),
+                )
 
     if request.method == "POST" and "file" in request.POST:
         # Handle file deletion here
@@ -90,7 +101,8 @@ def upload_file(request):
         cache.set(STATEMENT_FILES, " ".join(statement_files))
 
     statement_files_string = cache.get(STATEMENT_FILES)
-    context["statement_files"] = statement_files_string.split()
+    if statement_files_string is not None:
+        context["statement_files"] = statement_files_string.split()
 
     return render(request, "statement/upload_file.html", context)
 
@@ -108,24 +120,20 @@ def generate_app_password(request):
     )
 
 
-def format_statement(files):
+def format_statement():
     """Use the statement to return pandas DF"""
+
     statement_file_string = cache.get(STATEMENT_FILES)
     bank_statement_path = statement_file_string.split()[0]
 
-    statement_file_data = cache.get(bank_statement_path)
-
-    statement_df = pd.read_csv(io.StringIO(statement_file_data.decode("utf-8")))
-
-    statement_df = statement_df.applymap(
-        lambda x: x.strip() if isinstance(x, str) else x
+    statement_csv = cache.get(bank_statement_path)
+    statement_df = pd.read_csv(
+        io.StringIO(statement_csv),
+        index_col=0,
     )
-    statement_df = statement_df.rename(
-        columns={col: col.strip() for col in statement_df.columns}
-    )
-    statement_df["Date"] = pd.to_datetime(statement_df["Date"], format="%d/%m/%y")
-    # statement_df.set_index("Date", inplace=True)
-    statement_df = statement_df.reset_index(drop=True)
+    print(statement_df.head())
+    statement_df["Date"] = pd.to_datetime(statement_df["Date"], format="%d-%m-%Y")
+
     return statement_df
 
 
@@ -172,7 +180,8 @@ def bank_statement(request):
     if files is None:
         return redirect("no-statement")
 
-    statement_table = format_statement(files)
+    statement_table = format_statement()
+
     statement_table.loc[:] = add_category(statement_table)
     dates = statement_table["Date"]
 
@@ -411,8 +420,7 @@ def starting_page(request):
     if files is None:
         return redirect("no-statement")
     print(f"======== {files}")
-
-    statement_df = format_statement(files)
+    statement_df = format_statement()
     context, months = statement_as_bar(statement_df)
     month_option = request.GET.get("month")
 
