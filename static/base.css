@@ -12,13 +12,19 @@ html {
 }
 
 
-h1,
-h2,
-h3 {
+h1, h2, h3 {
   font-family: 'Rajdhani', sans-serif;
-  font-weight: bold;
-
+  background-color: #f7df1e; /* yellow */
+  color: #2d2d2d; /* dark gray */
+  padding: 10px; /* adds padding around the text */
+  font-weight: bold; /* makes the text bold */
+  text-align: center; /* centers the text */
+  text-transform: uppercase; /* makes the text uppercase */
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2); /* adds a subtle shadow */
+  margin: 0;
+  margin-bottom: 20px; /* adds space between this heading and the next element */
 }
+
 
 h1 {
   font-size: 50px;
@@ -30,6 +36,8 @@ h2 {
 
 h3 {
   font-size: 20px;
+  text-align: justify;
+  background-color: white;
 }
 
 #main-navigation {

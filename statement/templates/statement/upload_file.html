@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="{% static 'include\header.css' %}">
   <link rel="stylesheet" href="{% static 'include\navigation.css' %}">
   <link rel="stylesheet" href="{% static 'upload_file.css' %}">
+  <link rel="stylesheet" href="{% static 'base.css' %}">
+  <link rel="stylesheet" href="{% static 'footer.css' %}">
 {% endblock css_files %}
 
 {% block scripts %}
@@ -21,36 +23,7 @@
 
   <h2>Bank Details</h2>
 
-  <div id="form-container">
-    {% if upload_error %}
-     <p>Error: File format not supported. Upload CSV or TXT format. </p>
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <table>
-        <tr>
-          <td><label for="bank">Select Bank:</label></td>
-          <td>
-            <select name="bank">
-              <option value="{{ bank_option }}">{{ bank_option }}</option>
-              {% for bank in banks %}
-                <option value="{{ bank }}">{{ bank }}</option>
-              {% endfor %}
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td><label for="statement">Bank Statement:</label></td>
-          <td><input type="file" id="statement" name="statement"></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td><button type="submit">Submit</button></td>
-        </tr>
-      </table>
-    </form>
-    
-  </div>
+  {% include "statement_upload.html" %}
 
   {% if statement_files %}
     <h2>Uploaded Bank Statements</h2>
@@ -75,8 +48,6 @@
         </table>
       </form>
     </div>
-  {% endif %}
-  
-  
+  {% endif %}  
   
 {% endblock %}

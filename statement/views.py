@@ -14,6 +14,7 @@ import plotly.graph_objs as go
 import plotly.offline as opy
 
 from statement.static.packages import statement_parser
+from expense_tracker_app.settings import BASE_DIR
 
 # Create your views here.
 
@@ -23,6 +24,7 @@ BANKS = [
 ]
 
 STATEMENT_FILES = "bank_statements"
+IMAGE_PATH = os.path.join(BASE_DIR, "statement\static\images")
 
 
 class BooleanForm(forms.Form):
@@ -112,6 +114,14 @@ def no_statement(request):
     return render(request, "statement/no_statement.html")
 
 
+def help_page(request):
+    """Help page: /"""
+    return render(
+        request=request,
+        template_name="statement/help_page.html",
+    )
+
+
 def generate_app_password(request):
     """Help page: /"""
     return render(
@@ -178,7 +188,10 @@ def bank_statement(request):
 
     files = verify_uploads(request)
     if files is None:
-        return redirect("no-statement")
+        return render(
+            request=request,
+            template_name="statement/bank_statement.html",
+        )
 
     statement_table = format_statement()
 
@@ -415,10 +428,66 @@ def statement_as_pichart(statement_df, month, detailed_view):
 
 def starting_page(request):
     """Starting page: /"""
+
+    if request.method == "POST" and "bank" in request.POST:
+        # Handle form submission here
+        bank = request.POST.get("bank")
+        statement_file = request.FILES.get("statement")
+        statement_file_name = statement_file.name
+
+        if not statement_file_name.endswith((".txt", ".csv", ".CSV")):
+            print("----- WRONG FORMAT ------------------")
+            context["upload_error"] = True
+        else:
+            statement_file_df = statement_parser.parse_statement(bank, statement_file)
+            print("---------- Error after parsing")
+            if statement_file_df is None:
+                context["upload_error"] = True
+            else:
+                # Convert statement_file_df to html and save to cache
+                statement_files_string = cache.get(STATEMENT_FILES)
+
+                if statement_files_string is not None:
+                    statement_files_string = (
+                        f"{statement_files_string} {statement_file_name}"
+                    )
+                else:
+                    statement_files_string = statement_file_name
+
+                cache.set(STATEMENT_FILES, statement_files_string)
+
+                cache.set(
+                    statement_file_name,
+                    statement_file_df.to_csv(),
+                )
+
     files = verify_uploads(request)
 
     if files is None:
-        return redirect("no-statement")
+        images = []
+        for image in os.listdir(IMAGE_PATH):
+            images.append(
+                {
+                    "url": os.path.join("static\images", image),
+                    "name": image,
+                }
+            )
+        context = {
+            "bank_option": "Select Bank",
+            "banks": BANKS,
+            "images": images,
+        }
+
+        statement_files_string = cache.get(STATEMENT_FILES)
+        if statement_files_string is not None:
+            context["statement_files"] = statement_files_string.split()
+
+        return render(
+            request=request,
+            template_name="statement/no_statement.html",
+            context=context,
+        )
+
     print(f"======== {files}")
     statement_df = format_statement()
     context, months = statement_as_bar(statement_df)

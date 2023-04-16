@@ -10,6 +10,7 @@
         {% block title %}{% endblock title %}
     </title>
     <link rel="stylesheet" href="{% static "base.css" %}">
+    <link rel="stylesheet" href="{% static 'footer.css' %}">
 
     {% block css_files %}{% endblock css_files %}
     {% block scripts  %}{% endblock scripts  %}
@@ -17,5 +18,7 @@
 
 <body>    
     {% block content %}{% endblock content %}
+    {% include "footer.html" %}
 </body>
+
 </html>
