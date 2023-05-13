@@ -16,6 +16,7 @@ db.sqlite3
 
 # Static files (CSS, JavaScript, images)
 /static/admin/
+/staticfiles
 
 # Environment-specific files
 .env
