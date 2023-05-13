@@ -462,7 +462,7 @@ def starting_page(request):
         for image in os.listdir(IMAGE_PATH):
             images.append(
                 {
-                    "url": os.path.join("static\images", image),
+                    "url": os.path.join("static", "images", image),
                     "name": image,
                 }
             )
