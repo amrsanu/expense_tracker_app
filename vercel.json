@@ -1,18 +1,20 @@
 {
-    "builds": [
-        {
-          "src": "manage.py",
-          "use": "@vercel/python",
-          "config": {
-            "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate",
-            "outputDirectory": "staticfiles"
-          }
-        }
-      ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "expense_tracker_app/wsgi.py"
+  "builds": [
+    {
+      "src": "manage.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "cmd": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
+        "entrypoint": "python manage.py migrate"
       }
-    ]
-  }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "methods": ["GET", "HEAD", "POST"],
+      "dest": "/expense_tracker_app/wsgi.py"
+    }
+  ]
+}
