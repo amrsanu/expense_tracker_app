@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-o&=8^f)a=%-@j^vhn*s^hw547absy#5(qw$i13j*pw^as$4k)b"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -32,13 +32,14 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    "statement",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # User defined apps
+    "statement",
 ]
 
 MIDDLEWARE = [
@@ -119,15 +120,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+STATIC_URL = "/staticfiles/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "statement" / "static",
-    BASE_DIR / "statement" / "static" / "include",
-    BASE_DIR / "statement" / "static" / "images",
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -139,7 +137,6 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": "/tmp",
-        "TIMEOUT": 3600,
         "OPTIONS": {"MAX_ENTRIES": 1000},
     }
 }
