@@ -24,7 +24,7 @@ BANKS = [
 ]
 
 STATEMENT_FILES = "bank_statements"
-IMAGE_PATH = os.path.join(BASE_DIR, "staticfiles", "images")
+IMAGE_PATH = os.path.join(BASE_DIR, "Statement", "static", "images")
 
 
 class BooleanForm(forms.Form):
@@ -462,7 +462,7 @@ def starting_page(request):
         for image in os.listdir(IMAGE_PATH):
             images.append(
                 {
-                    "url": os.path.join("staticfiles", "images", image),
+                    "url": os.path.join("static", "images", image),
                     "name": image,
                 }
             )
