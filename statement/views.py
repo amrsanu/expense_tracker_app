@@ -424,7 +424,7 @@ def statement_as_pichart(statement_df, month, detailed_view):
 
 def starting_page(request):
     """Starting page: /"""
-
+    context = {}
     if request.method == "POST" and "bank" in request.POST:
         # Handle form submission here
         bank = request.POST.get("bank")
@@ -462,7 +462,7 @@ def starting_page(request):
         for image in os.listdir(IMAGE_PATH):
             images.append(
                 {
-                    "url": os.path.join("static", "images", image),
+                    "url": "static" / "images" / image,
                     "name": image,
                 }
             )
