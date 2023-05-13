@@ -24,7 +24,7 @@ BANKS = [
 ]
 
 STATEMENT_FILES = "bank_statements"
-IMAGE_PATH = os.path.join(BASE_DIR, "statement\static\images")
+IMAGE_PATH = os.path.join(BASE_DIR, "staticfiles", "images")
 
 
 class BooleanForm(forms.Form):
@@ -424,7 +424,7 @@ def statement_as_pichart(statement_df, month, detailed_view):
 
 def starting_page(request):
     """Starting page: /"""
-
+    context = {}
     if request.method == "POST" and "bank" in request.POST:
         # Handle form submission here
         bank = request.POST.get("bank")
@@ -462,7 +462,7 @@ def starting_page(request):
         for image in os.listdir(IMAGE_PATH):
             images.append(
                 {
-                    "url": os.path.join("static\images", image),
+                    "url": os.path.join("staticfiles", "images", image),
                     "name": image,
                 }
             )
