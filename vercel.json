@@ -6,15 +6,18 @@
       "config": {
         "maxLambdaSize": "50mb",
         "cmd": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
-        "entrypoint": "python manage.py migrate"
+        "entrypoint": "python manage.py runserver 0.0.0.0:$PORT"
       }
     }
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "staticfiles/$1"
+    },
+    {
       "src": "/(.*)",
-      "methods": ["GET", "HEAD", "POST"],
-      "dest": "/expense_tracker_app/wsgi.py"
+      "dest": "expense_tracker_app/wsgi.py"
     }
   ]
 }
