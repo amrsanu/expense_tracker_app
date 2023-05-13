@@ -138,7 +138,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "/var/tmp/bank_statement",
+        "LOCATION": "/bank_statement",
         "TIMEOUT": 3600,
         "OPTIONS": {"MAX_ENTRIES": 1000},
     }
