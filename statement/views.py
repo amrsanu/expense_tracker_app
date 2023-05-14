@@ -24,7 +24,7 @@ BANKS = [
 ]
 
 STATEMENT_FILES = "bank_statements"
-IMAGE_PATH = os.path.join(BASE_DIR, "Statement", "static", "images")
+IMAGE_PATH = os.path.join(BASE_DIR, "statement", "static", "images")
 
 
 class BooleanForm(forms.Form):
