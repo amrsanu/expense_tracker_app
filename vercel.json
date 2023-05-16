@@ -1,24 +1,29 @@
 {
-    "builds": [
-      {
-        "src": "expense_tracker_app/wsgi.py",
-        "use": "@vercel/python",
-        "config": {
-          "maxLambdaSize": "50mb",
-          "cmd": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
-          "entrypoint": "python manage.py runserver"
-        }
+  "installCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
+  "builds": [
+    {
+      "src": "expense_tracker_app/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "entrypoint": "expense_tracker_app/wsgi.py"
       }
-    ],
-    "routes": [
-      {
-        "src": "/static/(.*)",
-        "dest": "/staticfiles/$1"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "expense_tracker_app/wsgi.py"
-      }
-    ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/staticfiles/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "expense_tracker_app/wsgi.py"
+    }
+  ],
+  "env": {
+    "AWS_LAMBDA_EVENT_BODY_LIMIT": "100MB"
   }
+
+
+}
   
