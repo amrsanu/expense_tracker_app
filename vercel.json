@@ -3,19 +3,19 @@
   "builds": [
     {
       "src": "expense_tracker_app/wsgi.py",
-      "use": "@ardnt/vercel-python-wsgi",
+      "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb",
+        "entrypoint": "expense_tracker_app.wsgi.application",
         "runtime": "python3.9"
-      },
-      "output": {
-        "root": "/",
-        "src": "/app.py",
-        "clean": true
       }
     }
   ],
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "expense_tracker_app/wsgi.py"
@@ -24,7 +24,4 @@
   "env": {
     "AWS_LAMBDA_EVENT_BODY_LIMIT": "100MB"
   }
-
-
 }
-  
