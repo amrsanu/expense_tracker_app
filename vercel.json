@@ -3,18 +3,13 @@
   "builds": [
     {
       "src": "expense_tracker_app/wsgi.py",
-      "use": "@vercel/python",
+      "use": "@ardnt/vercel-python-wsgi",
       "config": {
-        "maxLambdaSize": "50mb",
-        "entrypoint": "expense_tracker_app/wsgi.py"
+        "maxLambdaSize": "50mb"
       }
     }
   ],
   "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/staticfiles/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "expense_tracker_app/wsgi.py"
