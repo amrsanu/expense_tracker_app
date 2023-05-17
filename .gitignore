@@ -10,8 +10,6 @@ db.sqlite3
 /venv
 
 # Media files (uploads, user-generated content)
-/media/
-/static/media/
 /uploads
 
 # Static files (CSS, JavaScript, images)
